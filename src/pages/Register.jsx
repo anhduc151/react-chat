@@ -1,18 +1,16 @@
-import React, { useState } from "react";
-import Add from "../img/addAvatar.png";
+import React from "react";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth, db, storage } from "../firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { doc, setDoc } from "firebase/firestore";
 import { useNavigate, Link } from "react-router-dom";
+import { message } from "antd";
 
 const Register = () => {
-  const [err, setErr] = useState(false);
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    setLoading(true);
+    message.loading("Please wait during the registration process");
     e.preventDefault();
     const displayName = e.target[0].value;
     const email = e.target[1].value;
@@ -45,17 +43,16 @@ const Register = () => {
 
             //create empty user chats on firestore
             await setDoc(doc(db, "userChats", res.user.uid), {});
-            navigate("/");
+            navigate("/login");
+            message.success("Sign Up Success");
           } catch (err) {
             console.log(err);
-            setErr(true);
-            setLoading(false);
+            message.error("registration failed");
           }
         });
       });
     } catch (err) {
-      setErr(true);
-      setLoading(false);
+      message.error("registration failed");
     }
   };
 
@@ -68,14 +65,9 @@ const Register = () => {
           <input required type="text" placeholder="display name" />
           <input required type="email" placeholder="email" />
           <input required type="password" placeholder="password" />
-          <input required style={{ display: "none" }} type="file" id="file" />
-          <label htmlFor="file">
-            <img src={Add} alt="" />
-            <span>Add an avatar</span>
-          </label>
-          <button disabled={loading}>Sign up</button>
-          {loading && "Uploading and compressing the image please wait..."}
-          {err && <span>Something went wrong</span>}
+          <input required type="file" id="file" />
+
+          <button>Sign up</button>
         </form>
         <p>
           You do have an account? <Link to="/login">Login</Link>
